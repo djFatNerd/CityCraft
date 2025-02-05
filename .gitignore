@@ -17,9 +17,15 @@
 /Blender/blender-4.0.2-linux-x64/
 /Blender/blender-4.0.2-linux-x64.tar.xz
 
+# Large files
+render_scene/extra_assets/stuff/1_tree_with_base.glb
+render_scene/extra_assets/world_hdri/kloofendal_48d_partly_cloudy_puresky_8k.hdr
+render_scene/rendered_scenes/layout_1.blend
 
 # others
-
+/render_scene/rendered_scenes
+/render_scene/extra_assets
+/render_scene/textures
 
 # this file
 .gitignore
