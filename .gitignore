@@ -1,31 +1,31 @@
-# datasets
-/dataset/CityCraft_Buildings
-/dataset/CityCraft_OSM
+# Datasets
+dataset/CityCraft_Buildings/
+dataset/CityCraft_OSM/
 
-# models
-/pretrained_models
+# Models
+pretrained_models/
 
-# samples
-/layout_generation/samples_raw
-/layout_generation/samples
+# Samples
+layout_generation/samples_raw/
+layout_generation/samples/
 
-# scripts
-/layout_generation/models_ratio_condition.py
-/urban_planning/llm_planning_with_key.sh
+# Scripts
+layout_generation/models_ratio_condition.py
+urban_planning/llm_planning_with_key.sh
 
 # Blender
-/Blender/blender-4.0.2-linux-x64/
-/Blender/blender-4.0.2-linux-x64.tar.xz
+Blender/blender-4.0.2-linux-x64/
+Blender/blender-4.0.2-linux-x64.tar.xz
 
-# Large files
+# Large files to ignore
 render_scene/extra_assets/stuff/1_tree_with_base.glb
 render_scene/extra_assets/world_hdri/kloofendal_48d_partly_cloudy_puresky_8k.hdr
 render_scene/rendered_scenes/layout_1.blend
 
-# others
-/render_scene/rendered_scenes
-/render_scene/extra_assets
-/render_scene/textures
+# Other rendered scene files
+render_scene/rendered_scenes/
+render_scene/extra_assets/
+render_scene/textures/
 
-# this file
+# Ignore the .gitignore file itself (if needed)
 .gitignore
