@@ -180,3 +180,14 @@ sh render_scene.sh
 ```
 
 After this step, you will have the rendered scenes in the folder "**render_scene/rendered_scenes/**".
+
+If you feel our work is helpful, please consider citing our work:
+
+```bibtex
+@article{deng2024citycraft,
+  title={CityCraft: A Real Crafter for 3D City Generation},
+  author={Deng, Jie and Chai, Wenhao and Huang, Junsheng and Zhao, Zhonghan and Huang, Qixuan and Gao, Mingyan and Guo, Jianshu and Hao, Shengyu and Hu, Wenhao and Hwang, Jenq-Neng and others},
+  journal={arXiv preprint arXiv:2406.04983},
+  year={2024}
+}
+``` 
