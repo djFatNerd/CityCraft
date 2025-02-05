@@ -152,7 +152,25 @@ cd Blender
 tar -xJvf blender-4.0.2-linux-x64.tar.xz
 ```
 
-step 3: Start Rendering
+step 3: Download extra assets and textures
+
+Download extra assets and textures from "https://huggingface.co/GearlessJ333/CityCraft/tree/main" and put it in the folder "**CityCraft/render_scene/**"
+
+```bash
+cd render_scene
+unzip extra_assets.zip
+unzip textures.zip
+```
+
+After this step, you will have the following structure:
+
+```
+render_scene/
+    extra_assets/
+    textures/
+```
+
+step 4: Start Rendering
 
 Note: You need to set the path to the layout image and the selected assets pkl file in the **render_scene.sh** file. You also need to set the path to the Blender executable file to where you installed it. 
 
