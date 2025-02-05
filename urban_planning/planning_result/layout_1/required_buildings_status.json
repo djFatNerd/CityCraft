@@ -1,0 +1,22 @@
+{
+    "residential buildings": {
+        "target": 40,
+        "current_planned": 37
+    },
+    "green spaces": {
+        "target": 4,
+        "current_planned": 0
+    },
+    "children's playgrounds": {
+        "target": 4,
+        "current_planned": 1
+    },
+    "fitness facilities": {
+        "target": 2,
+        "current_planned": 2
+    },
+    "commercial center": {
+        "target": 1,
+        "current_planned": 0
+    }
+}

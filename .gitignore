@@ -1,6 +1,25 @@
 # datasets
-/dataset
+/dataset/CityCraft_Buildings
+/dataset/CityCraft_OSM
 
 # models
 /pretrained_models
 
+# samples
+/layout_generation/samples_raw
+/layout_generation/samples
+
+# scripts
+/layout_generation/models_ratio_condition.py
+/urban_planning/llm_planning_with_key.sh
+
+# Blender
+/Blender/blender-4.0.2-linux-x64/
+/Blender/blender-4.0.2-linux-x64.tar.xz
+
+
+# others
+
+
+# this file
+.gitignore

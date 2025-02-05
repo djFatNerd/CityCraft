@@ -1,0 +1,3 @@
+Layout Image: input_layout.png
+User Requirements: This is a residential area with supporting facilities and a modern architectural style, emphasizing the combination of functionality and aesthetics. The residential area is equipped with green spaces, children's playgrounds, fitness facilities, and a commercial center to meet the daily needs of residents.
+Total Iterations: 5
