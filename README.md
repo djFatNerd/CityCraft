@@ -7,7 +7,7 @@ This is the official codebase for ***CityCraft***: **A Diffusion and LLM Powered
 
 Development environment:
 - OS: Ubuntu 22.04
-- CUDA: 11.7 (from nvidia-smi)
+- CUDA: 11.7
 - PyTorch: 2.0.1
 
 ## Environment Setup
