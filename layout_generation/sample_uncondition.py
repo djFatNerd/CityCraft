@@ -74,7 +74,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, default="DiT-B/2")
     parser.add_argument("--image-size", type=int, default=768)
     parser.add_argument("--num-sampling-steps", type=int, default=1000)
-    parser.add_argument("--ckpt", type=str, default='./pretrained_models/uncondition_generation.pt', help="path to a DiT checkpoint")
+    parser.add_argument("--ckpt", type=str, default='../pretrained_models/uncondition_generation.pt', help="path to a DiT checkpoint")
     parser.add_argument("--num-samples", type=int, default=8)
     parser.add_argument("--output-dir", type=str, default="./samples")
     parser.add_argument("--output-name", type=str, default="sample_uncondition")
