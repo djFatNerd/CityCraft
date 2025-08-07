@@ -88,9 +88,20 @@ CityCraft_Buildings/
 Our layout generation model is a diffusion transformer [DiT](https://arxiv.org/abs/2212.09748). Specifically, we used **DiT-B/2** and our training script is developed upon [FastDiT](https://github.com/chuanyangjin/fast-DiT). 
 
 
+
 ```bash
 cd layout_generation
-python accelerate launch --multi_gpu --num_processes 4 --mixed_precision bf16 train.py --model DiT-B/2 --ckpt-every-epoch 10 --global-batch-size 256  --lr 1e-5 
+```
+
+#### Train Unconditional Generation Model
+
+```bash
+accelerate launch --multi_gpu --num_processes 4 --mixed_precision bf16 train.py --model DiT-B/2 --ckpt-every-epoch 10 --global-batch-size 256  --lr 1e-5 
+```
+
+#### Train Ratio-Conditioned Model
+```bash
+accelerate launch --multi_gpu --num_processes 4 --mixed_precision no train_class_ratio.py --model DiT-B/2 --ckpt-every-epoch 10 --global-batch-size 256 --lr 1e-5
 ```
 
 You can adjust all training parameters on your need. You also need to config [Accelerator](https://huggingface.co/docs/accelerate/en/package_reference/accelerator) before training.

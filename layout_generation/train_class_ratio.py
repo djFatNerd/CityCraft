@@ -11,15 +11,8 @@ import torch
 # the first flag below was False when we tested this script but True makes A100 training a lot faster:
 torch.backends.cuda.matmul.allow_tf32 = True
 torch.backends.cudnn.allow_tf32 = True
-import torch.distributed as dist
-from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import Dataset, DataLoader
-from torch.utils.data.distributed import DistributedSampler
-from torchvision.datasets import ImageFolder
-from torchvision import transforms
-import numpy as np
 from collections import OrderedDict
-from PIL import Image
 from copy import deepcopy
 from glob import glob
 from time import time
@@ -29,10 +22,8 @@ import os
 from accelerate import Accelerator
 import sys
 
-from models import DiT_models
+from models_ratio_condition import DiT_models # modified DiT model for class ratio conditioning
 from utils.diffusion import create_diffusion
-from diffusers.models import AutoencoderKL
-
 from patch_conv import convert_model
 import wandb
 import h5py
@@ -102,15 +93,12 @@ class OSM_HDF5_Dataset(Dataset):
 #################################################################################
 #                                  Training Loop                                #
 #################################################################################
-
-
 # load pretrained model
 def load_model(model_name):
         checkpoint = torch.load(model_name, map_location=lambda storage, loc: storage)
         model_dict = checkpoint["model"]
         ema_dict = checkpoint["ema"]
         return  model_dict , ema_dict
-
 
 def main(args):
     """
@@ -123,7 +111,11 @@ def main(args):
     device = accelerator.device    
     
     # Setup an experiment folder:
-    if accelerator.is_main_process:        
+    if accelerator.is_main_process:
+
+        tracker_config =dict(vars(args))
+        accelerator.init_trackers(args.tracker_project_name, tracker_config)
+
         os.makedirs(args.results_dir, exist_ok=True)  # Make results folder (holds all experiment subfolders)
         experiment_index = len(glob(f"{args.results_dir}/*"))
         model_string_name = args.model.replace("/", "-")  # e.g., DiT-XL/2 --> DiT-XL-2 (for naming folders)
@@ -141,7 +133,7 @@ def main(args):
                        settings=wandb.Settings(start_method='fork'))
         
         
-
+        
     # Create model:
     assert args.image_size % 8 == 0, "Image size must be divisible by 8 (for the VAE encoder)."
     latent_size = args.image_size // 8
@@ -214,11 +206,7 @@ def main(args):
             y = y.squeeze(dim=1)
             t = torch.randint(0, diffusion.num_timesteps, (x.shape[0],), device=device)
             model_kwargs = dict(y=y)
-            if args.condition:
-                loss_dict = diffusion.training_losses(model, x, t, model_kwargs)
-            else:       
-                loss_dict = diffusion.training_losses(model, x, t)
-            
+            loss_dict = diffusion.training_losses(model, x, t, model_kwargs)
             loss = loss_dict["loss"].mean()
             opt.zero_grad()
             accelerator.backward(loss)
@@ -239,16 +227,16 @@ def main(args):
                 avg_loss = avg_loss.item() / accelerator.num_processes
                 if accelerator.is_main_process:
                     logger.info(f"(step={train_steps:07d}) Train Loss: {avg_loss:.4f}, Train Steps/Sec: {steps_per_sec:.2f}")
-                    
-                    # use_wandb
+                    # accelerator.log({f'train Loss': avg_loss, f'Train Steps/Sec':steps_per_sec}, step=train_steps)
+
                     if args.use_wandb:
                         wandb.log({f'train Loss': avg_loss, f'Train Steps/Sec':steps_per_sec}, step=train_steps)
+
                 # Reset monitoring variables:
                 running_loss = 0
                 log_steps = 0
-                start_time = time()   
-                
-                    
+                start_time = time()
+
         if train_epochs % args.ckpt_every_epoch == 0 and train_epochs > 0:
             if accelerator.is_main_process:
                     checkpoint = {
@@ -268,6 +256,7 @@ def main(args):
     
     if accelerator.is_main_process:
         logger.info("Done!")
+        #accelerator.end_training()
         if args.use_wandb:
             wandb.finish()
 
@@ -275,18 +264,14 @@ def main(args):
 if __name__ == "__main__":
     # Default args here will train DiT-XL/2 with the hyperparameters we used in our paper (except training iters).
     parser = argparse.ArgumentParser()
-    parser.add_argument("--condition", type=str, default=None) # training with condition or not
-
-    # parser.add_argument("--feature-path", type=str, default="features")
-    # parser.add_argument("--results-dir", type=str, default="results/OSM/h5_bf16/unconditional_60370/no_mixed_precision_overfitting")
-    parser.add_argument("--results-dir", type=str, default="DiT_OSM_Training_Results")
-    # parser.add_argument("--model", type=str, choices=list(DiT_models.keys()), default="DiT-XL/2")
+    
+    parser.add_argument("--condition", type=str, default='class') # training with condition or not
+    parser.add_argument("--results-dir", type=str, default="DiT_OSM_Conditioning_Training_Results")
     parser.add_argument("--epochs", type=int, default=20000)
-    # parser.add_argument("--global-batch-size", type=int, default=256)
     parser.add_argument("--global-seed", type=int, default=0)
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--vae", type=str, choices=["ema", "mse"], default="ema")  # Choice doesn't affect training
-    parser.add_argument("--num-workers", type=int, default=4)
+    parser.add_argument("--num-workers", type=int, default=8)
     parser.add_argument("--log-every", type=int, default=1)
     parser.add_argument("--ckpt-every", type=int, default=50_000)
     
@@ -294,20 +279,20 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, choices=list(DiT_models.keys()), default="DiT-B/2")
     parser.add_argument("--feature-path", type=str, default="../dataset/CityCraft_OSM/features/image_ratio_features")
     parser.add_argument("--image-size", type=int, default=768)
-    # parser.add_argument("--num-classes", type=int, default=1) # just do unconditional
+
     parser.add_argument("--global-batch-size", type=int, default=768)
-    
     parser.add_argument("--ckpt", type=str, default=None) # pretrained model path
     parser.add_argument('--use-wandb', action='store_true', 
                     help='whether to use Weights & Biases for logging')
     
     parser.add_argument("--ckpt-every-epoch", type=int, default=10)
-    
+
+    parser.add_argument("--tracker-project-name", type=str, default="CityCraft-DiT-dense-houses")
+
     args = parser.parse_args()
     main(args)
     
     '''
         To train, run:
-            accelerate launch --multi_gpu --num_processes 8 --mixed_precision bf16 train.py --model DiT-S/8 --ckpt-every-epoch 10 --global-batch-size 256 --ckpt /data/jd_data/fast-DiT/results/OSM/h5_bf16/unconditional_16000/001-DiT-S-8/checkpoints/0005080.pt --lr 1e-5
-    
+            export CUDA_VISIBLE_DEVICES="0,1,2,3" && accelerate launch --multi_gpu --num_processes 4 --mixed_precision no train_class_ratio.py --model DiT-B/2 --ckpt-every-epoch 10 --global-batch-size 256 --lr 1e-4
     '''
